@@ -4,48 +4,80 @@ void main() {
   runApp(MyApp());
 }
 
+// Корневой виджет приложения
 class MyApp extends StatelessWidget {
-  final List<String> fruits = [ //создание списка, лист, не изменяется
-    '🍎 Apple',
-    '🍌 Banana',
-    '🍇 Grapes',
-    '🍉 Watermelon',
-    '🍍 Pineapple',
-    '🥭 Mango',
-    '🍓 Strawberry',
-    '🍑 Peach',
-  ];
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Fruits List',
-      theme: ThemeData( //задаёт цветовую тему и шрифт
-        primarySwatch: Colors.teal, // Цвет темы
-        textTheme: TextTheme(
-          bodyMedium: TextStyle(fontSize: 18),
+      title: 'Navigation & State Demo',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: CounterScreen(), // стартовый экран
+    );
+  }
+}
+
+// Экран №1 — счётчик
+class CounterScreen extends StatefulWidget { //измен данные
+  @override
+  _CounterScreenState createState() => _CounterScreenState();//хранение состояния
+}
+
+class _CounterScreenState extends State<CounterScreen> {
+  int counter = 0; // кол во нажатий
+
+  void increment() {
+    setState(() { //после этого будут менятся значения
+      counter++; // обновляем состояние
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold( //базовый экран
+      appBar: AppBar(title: Text('Counter Screen')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('натыканно: $counter', style: TextStyle(fontSize: 24)), //вставка переменной прямо в текст
+            SizedBox(height: 16),
+            ElevatedButton( //кнопка
+              onPressed: increment, //что произайдёт
+              child: Text('тыкать'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                // Навигация на второй экран
+                Navigator.push( //открывает 2 экран
+                  context,
+                  MaterialPageRoute( //переход с анимацией
+                    builder: (context) => DetailsScreen(value: counter), //передаёт значение
+                  ),
+                );
+              },
+              child: Text('инфо'),
+            ),
+          ],
         ),
       ),
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('Fruits List'),
-          centerTitle: true,
-        ),
-        body: ListView.builder( //список с прокруткой
-          itemCount: fruits.length,
-          itemBuilder: (context, index) { //функция, которая создаёт один элемент списка по индексу
-            return Card( //создание карточки фрукты
-              margin: EdgeInsets.symmetric(horizontal: 10, vertical: 6), // отступы
-              child: ListTile(
-                leading: CircleAvatar( //элемент слева
-                  backgroundColor: Colors.teal.shade100, //цвет фона
-                  child: Text(fruits[index][0]),
-                ),
-                title: Text(fruits[index]), //текст
-                trailing: Icon(Icons.arrow_forward_ios, size: 16),
-              ),
-            );
-          },
+    );
+  }
+}
+
+//  Экран №2 — показывает переданное значение
+class DetailsScreen extends StatelessWidget {
+  final int value; //переменная для хранения
+  DetailsScreen({required this.value}); //передача данных
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Details Screen')),
+      body: Center(
+        child: Text(
+          'вы натыкали: $value',
+          style: TextStyle(fontSize: 24),
+          textAlign: TextAlign.center,
         ),
       ),
     );
