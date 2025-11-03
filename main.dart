@@ -1,84 +1,67 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http; //выполнение http  запросов
+import 'dart:convert'; // для обработки JSON
 
 void main() {
   runApp(MyApp());
 }
 
-// Корневой виджет приложения
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Navigation & State Demo',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: CounterScreen(), // стартовый экран
+      title: 'Network Demo',
+      home: CatImageScreen(), //экран с котом
+      debugShowCheckedModeBanner: false, //убирает банер
     );
   }
 }
 
-// Экран №1 — счётчик
-class CounterScreen extends StatefulWidget { //измен данные
+class CatImageScreen extends StatefulWidget { //измен данные
   @override
-  _CounterScreenState createState() => _CounterScreenState();//хранение состояния
+  _CatImageScreenState createState() => _CatImageScreenState(); //хранение переменных
 }
 
-class _CounterScreenState extends State<CounterScreen> {
-  int counter = 0; // кол во нажатий
+class _CatImageScreenState extends State<CatImageScreen> {
+  String? imageUrl; // ссылка на картинку кота
+  bool isLoading = false; //идёт ли загрузка
 
-  void increment() {
-    setState(() { //после этого будут менятся значения
-      counter++; // обновляем состояние
+  Future<void> fetchCatImage() async { //выполнение запроса
+    setState(() {
+      isLoading = true;
     });
-  }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold( //базовый экран
-      appBar: AppBar(title: Text('Counter Screen')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('натыканно: $counter', style: TextStyle(fontSize: 24)), //вставка переменной прямо в текст
-            SizedBox(height: 16),
-            ElevatedButton( //кнопка
-              onPressed: increment, //что произайдёт
-              child: Text('тыкать'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                // Навигация на второй экран
-                Navigator.push( //открывает 2 экран
-                  context,
-                  MaterialPageRoute( //переход с анимацией
-                    builder: (context) => DetailsScreen(value: counter), //передаёт значение
-                  ),
-                );
-              },
-              child: Text('инфо'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+    // запрос к API
+    final response = await http.get(Uri.parse('https://api.thecatapi.com/v1/images/search'));
 
-//  Экран №2 — показывает переданное значение
-class DetailsScreen extends StatelessWidget {
-  final int value; //переменная для хранения
-  DetailsScreen({required this.value}); //передача данных
+    if (response.statusCode == 200) { //успешный ответ
+      final data = json.decode(response.body); //превращает JSON-строку в структуру Dart
+      setState(() {
+        imageUrl = data[0]['url']; //выдача картинок
+        isLoading = false;
+      });
+    } else {
+      setState(() { //обнова картин
+        imageUrl = null;
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Details Screen')),
+      appBar: AppBar(title: Text('Cat API Demo')),
       body: Center(
-        child: Text(
-          'вы натыкали: $value',
-          style: TextStyle(fontSize: 24),
-          textAlign: TextAlign.center,
-        ),
+        child: isLoading
+            ? CircularProgressIndicator()
+            : imageUrl == null
+            ? Text('Press button to load a cat ')
+            : Image.network(imageUrl!), // загрузка картинки из интернета
+      ),
+      floatingActionButton: FloatingActionButton( //виджет кнопки
+        onPressed: fetchCatImage, //обработка нажатия
+        child: Icon(Icons.refresh), //иконка
       ),
     );
   }
