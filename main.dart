@@ -5,51 +5,47 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp( //обёртка
-      title: 'Simple Counter',
-      home: CounterScreen(), //вывод экрана
-    );
-  }
-}
-
-class CounterScreen extends StatefulWidget { //счётчик, изменения интерфейса
-  @override
-  State<CounterScreen> createState() => _CounterScreenState();//тут хранится логика
-}
-
-class _CounterScreenState extends State<CounterScreen> {
-  int count = 0; // переменная состояния
-
-  void increase() { //вызываеься при нажатии
-    setState(() { //для обновления экрана
-      count++; // изменяем состояние
-    });
-  }
+  final List<String> fruits = [ //создание списка, лист, не изменяется
+    '🍎 Apple',
+    '🍌 Banana',
+    '🍇 Grapes',
+    '🍉 Watermelon',
+    '🍍 Pineapple',
+    '🥭 Mango',
+    '🍓 Strawberry',
+    '🍑 Peach',
+  ];
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('unit 2')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center, //выравнивание по центру
-          children: [
-            Text(
-              'You pressed the button:',
-              style: TextStyle(fontSize: 20),
-            ),
-            Text(
-              '$count times',
-              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton( //кнопка
-              onPressed: increase, // вызов при нажатии счётчика
-              child: Text('ТЫКАЙ!'),
-            ),
-          ],
+    return MaterialApp(
+      title: 'Fruits List',
+      theme: ThemeData( //задаёт цветовую тему и шрифт
+        primarySwatch: Colors.teal, // Цвет темы
+        textTheme: TextTheme(
+          bodyMedium: TextStyle(fontSize: 18),
+        ),
+      ),
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text('Fruits List'),
+          centerTitle: true,
+        ),
+        body: ListView.builder( //список с прокруткой
+          itemCount: fruits.length,
+          itemBuilder: (context, index) { //функция, которая создаёт один элемент списка по индексу
+            return Card( //создание карточки фрукты
+              margin: EdgeInsets.symmetric(horizontal: 10, vertical: 6), // отступы
+              child: ListTile(
+                leading: CircleAvatar( //элемент слева
+                  backgroundColor: Colors.teal.shade100, //цвет фона
+                  child: Text(fruits[index][0]),
+                ),
+                title: Text(fruits[index]), //текст
+                trailing: Icon(Icons.arrow_forward_ios, size: 16),
+              ),
+            );
+          },
         ),
       ),
     );
